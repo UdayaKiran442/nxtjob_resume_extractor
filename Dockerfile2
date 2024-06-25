@@ -1,0 +1,22 @@
+FROM rust:latest
+
+WORKDIR /app
+
+RUN apt-get update &&  \
+    apt-get install -y wget unzip && \
+    apt-get install git-lfs
+
+
+RUN wget https://download.pytorch.org/libtorch/cu118/libtorch-cxx11-abi-shared-with-deps-2.0.0%2Bcu118.zip
+RUN unzip libtorch-cxx11-abi-shared-with-deps-2.0.0+cu118.zip -d /opt
+
+ENV LIBTORCH=/opt/libtorch
+ENV LD_LIBRARY_PATH=${LIBTORCH}/lib:$LD_LIBRARY_PATH
+
+
+# Copy the Cargo.toml and src directory to the container
+COPY Cargo.toml .
+COPY src ./src
+
+# Build the Rust project in release mode
+RUN cargo build --release
