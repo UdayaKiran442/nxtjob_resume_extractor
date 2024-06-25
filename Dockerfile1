@@ -1,0 +1,31 @@
+# Use the official Ubuntu 22.04 image as the base image
+FROM ubuntu:22.04
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y wget unzip cmake build-essential python3-pip && \
+    rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip and install wheel
+RUN pip3 install --upgrade pip && \
+    pip3 install wheel
+
+# Install PyTorch using pip3
+RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+# Install Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Set the environment variables to use the Python PyTorch installation
+ENV LIBTORCH_USE_PYTORCH=1
+
+# Copy the Cargo.toml and src directory to the container
+COPY Cargo.toml .
+COPY src ./src
+
+# Build the Rust project in release mode
+RUN cargo build --release
