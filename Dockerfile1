@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Install dependencies
 RUN apt-get update && \
-    apt-get install -y wget unzip cmake build-essential python3-pip && \
+    apt-get install -y wget unzip cmake build-essential python3-pip curl && \
     rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip and install wheel
@@ -27,5 +27,9 @@ ENV LIBTORCH_USE_PYTORCH=1
 COPY Cargo.toml .
 COPY src ./src
 
+# Ensure the correct Rust toolchain is installed
+RUN /root/.cargo/bin/rustup override set stable
+RUN /root/.cargo/bin/rustup update stable
+
 # Build the Rust project in release mode
-RUN cargo build --release
+RUN /root/.cargo/bin/cargo build --release
